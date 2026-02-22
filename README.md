@@ -21,24 +21,43 @@
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
 
-    // Spaceship
-    const ship = { x: 225, y: 550, width: 50, height: 30, speed: 5, health: 100 };
+    // Spaceship object
+    const ship = {
+      x: 225,
+      y: 550,
+      width: 50,
+      height: 30,
+      speed: 5,
+      health: 100
+    };
 
-    // Bullets & Aliens
     let bullets = [];
     let aliens = [];
-
-    // Controls
     let keys = {};
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
+    let firing = false; // track if fire button is pressed
 
-    // Fire bullets
+    // Key events
     document.addEventListener("keydown", e => {
-      if (e.key === " ") {
-        bullets.push({ x: ship.x + ship.width/2 - 2, y: ship.y, width: 4, height: 10, speed: 7 });
-      }
+      keys[e.key] = true;
+      if (e.key === " ") firing = true; // start firing
     });
+    document.addEventListener("keyup", e => {
+      keys[e.key] = false;
+      if (e.key === " ") firing = false; // stop firing
+    });
+
+    // Fire bullets continuously while space is held
+    setInterval(() => {
+      if (firing) {
+        bullets.push({
+          x: ship.x + ship.width/2 - 2,
+          y: ship.y,
+          width: 4,
+          height: 10,
+          speed: 7
+        });
+      }
+    }, 200); // fire rate (every 200ms)
 
     // Spawn aliens continuously
     setInterval(() => {
@@ -57,7 +76,7 @@
       // Move aliens
       aliens.forEach(a => a.y += a.speed);
 
-      // Collision detection (bullet vs alien)
+      // Bullet vs Alien collision
       bullets.forEach((b, bi) => {
         aliens.forEach((a, ai) => {
           if (b.x < a.x + a.width && b.x + b.width > a.x &&
@@ -68,7 +87,7 @@
         });
       });
 
-      // Collision detection (alien vs ship)
+      // Alien vs Ship collision
       aliens.forEach((a, ai) => {
         if (ship.x < a.x + a.width && ship.x + ship.width > a.x &&
             ship.y < a.y + a.height && ship.y + ship.height > a.y) {
@@ -81,7 +100,7 @@
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw health bar
+      // Health display
       ctx.fillStyle = "white";
       ctx.font = "20px Arial";
       ctx.fillText("Health: " + ship.health + "%", 10, 25);
@@ -116,3 +135,4 @@
   </script>
 </body>
 </html>
+
