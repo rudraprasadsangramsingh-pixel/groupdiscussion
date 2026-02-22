@@ -22,7 +22,7 @@
     const ctx = canvas.getContext("2d");
 
     // Spaceship
-    const ship = { x: 225, y: 550, width: 50, height: 30, speed: 5 };
+    const ship = { x: 225, y: 550, width: 50, height: 30, speed: 5, health: 100 };
 
     // Bullets & Aliens
     let bullets = [];
@@ -46,7 +46,7 @@
     }, 1000);
 
     function update() {
-      // Move ship
+      // Move ship left/right only
       if (keys["ArrowLeft"] && ship.x > 0) ship.x -= ship.speed;
       if (keys["ArrowRight"] && ship.x < canvas.width - ship.width) ship.x += ship.speed;
 
@@ -57,7 +57,7 @@
       // Move aliens
       aliens.forEach(a => a.y += a.speed);
 
-      // Collision detection
+      // Collision detection (bullet vs alien)
       bullets.forEach((b, bi) => {
         aliens.forEach((a, ai) => {
           if (b.x < a.x + a.width && b.x + b.width > a.x &&
@@ -67,10 +67,24 @@
           }
         });
       });
+
+      // Collision detection (alien vs ship)
+      aliens.forEach((a, ai) => {
+        if (ship.x < a.x + a.width && ship.x + ship.width > a.x &&
+            ship.y < a.y + a.height && ship.y + ship.height > a.y) {
+          aliens.splice(ai, 1);
+          ship.health -= 1; // reduce health by 1%
+        }
+      });
     }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw health bar
+      ctx.fillStyle = "white";
+      ctx.font = "20px Arial";
+      ctx.fillText("Health: " + ship.health + "%", 10, 25);
 
       // Draw ship
       ctx.fillStyle = "cyan";
@@ -88,7 +102,14 @@
     function gameLoop() {
       update();
       draw();
-      requestAnimationFrame(gameLoop);
+
+      if (ship.health > 0) {
+        requestAnimationFrame(gameLoop);
+      } else {
+        ctx.fillStyle = "white";
+        ctx.font = "40px Arial";
+        ctx.fillText("GAME OVER", canvas.width/2 - 100, canvas.height/2);
+      }
     }
 
     gameLoop();
